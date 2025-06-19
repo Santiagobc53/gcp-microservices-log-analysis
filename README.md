@@ -1,69 +1,70 @@
-# GCP Microservices Log Analysis Lab
+# 🧠 GCP Logging & Observability in GKE
 
-This repository documents the process and queries used in a hands-on Google Cloud lab focused on analyzing logs from a microservices-based application deployed in Kubernetes Engine (GKE).
+Este repositorio documenta el laboratorio de Google Cloud sobre la recopilación, análisis y exportación de registros en aplicaciones de microservicios desplegadas en Google Kubernetes Engine (GKE). El laboratorio incluye integración con Cloud Logging, creación de buckets personalizados, receptores (sinks) y análisis con BigQuery.
 
-## 🌐 Lab Summary
+---
 
-In this lab, I worked with a real microservices demo app ("Online Boutique") deployed on a GKE cluster. Using Cloud Logging and Log Analytics, I was able to:
+## ✅ Objetivos del laboratorio
 
-- Deploy the application and verify Kubernetes pod health
-- Explore logs using Log Explorer
-- Create log buckets and configure sinks for routing
-- Analyze application performance through custom SQL queries in BigQuery
+- Visualizar y consultar registros de microservicios desplegados en GKE.
+- Crear un bucket de registros con Log Analytics activado.
+- Exportar registros desde Cloud Logging hacia BigQuery.
+- Ejecutar consultas SQL para análisis de errores, latencia y comportamiento del usuario.
 
-## 🔍 Key Concepts Covered
+---
 
-- GKE deployment verification
-- Cloud Logging buckets and routing
-- Log-based metrics and queries
-- Latency and error log analysis
-- Exporting logs to BigQuery
-- Using SQL to identify performance bottlenecks
+## 📁 Estructura del repositorio
 
-## 📊 Sample SQL Queries
+```bash
+├── README.md                  # Documentación del laboratorio
+├── queries/                   # Consultas SQL utilizadas en Log Analytics / BigQuery
+│   ├── latest_errors.sql
+│   ├── latency_stats.sql
+│   ├── product_views.sql
+│   └── cart_checkout_sessions.sql
+🔍 Consultas destacadas
+latest_errors.sql: muestra los últimos errores registrados por los pods.
 
-Some example queries used during the lab:
+latency_stats.sql: calcula latencia mínima, máxima y promedio del frontend.
 
-```sql
--- Recent container errors
-SELECT
-  timestamp,
-  JSON_VALUE(resource.labels.container_name) AS container,
-  json_payload
-FROM `PROJECT_ID.global.day2ops-log._AllLogs`
-WHERE severity = "ERROR"
-  AND json_payload IS NOT NULL
-ORDER BY 1 DESC
-LIMIT 50;
+product_views.sql: cuenta cuántas veces se visualizó un producto.
 
--- Latency stats per hour
-SELECT
-  hour,
-  MIN(took_ms) AS min,
-  MAX(took_ms) AS max,
-  AVG(took_ms) AS avg
-FROM (
-  SELECT
-    FORMAT_TIMESTAMP("%H", timestamp) AS hour,
-    CAST(JSON_VALUE(json_payload, '$."http.resp.took_ms"') AS INT64) AS took_ms
-  FROM `PROJECT_ID.global.day2ops-log._AllLogs`
-  WHERE timestamp > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
-    AND json_payload IS NOT NULL
-    AND JSON_VALUE(json_payload.message) = "request completed"
-)
-GROUP BY 1
-ORDER BY 1;
+cart_checkout_sessions.sql: identifica sesiones que hicieron checkout.
 
-📁 Folder Structure
-pgsql
-Copiar código
-gcp-microservices-log-analysis/
-├── README.md
-└── queries/
-    ├── errors.sql
-    ├── latency_stats.sql
-    └── checkout_sessions.sql 
+🧪 Evidencias del laboratorio
+Microservicios en GKE	Servicios en Kubernetes	App Online Boutique funcionando
 
-    ✨ Author
+📝 Capturas:
+
+Todos los pods corriendo (Running).
+
+Servicios en estado OK, incluyendo frontend-external.
+
+Aplicación Online Boutique abierta exitosamente desde IP externa.
+
+🧠 Aprendizajes clave
+Uso del Explorador de Logs para filtrar eventos específicos (k8s_container).
+
+Creación de buckets personalizados y vinculación con BigQuery.
+
+Generación de sinks (receptores) para enrutar registros.
+
+Ejecución de consultas avanzadas en Log Analytics.
+
+🛠️ Tecnologías utilizadas
+Google Kubernetes Engine (GKE)
+
+Cloud Logging + Log Explorer
+
+Cloud Monitoring
+
+BigQuery
+
+Cloud Shell
+
+kubectl
+
+👨‍💻 Autor
 Santiago Barrera
-GitHub: Santiagobc53
+GitHub | LinkedIn
+
